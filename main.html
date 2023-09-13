@@ -1,16 +1,129 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Cost of Connecting Ropes</title>
+    <script>
+        // Function to calculate the minimum cost of connecting ropes
+        function mincost(arr) {
+            if (arr.length < 2) {
+                return 0; // No cost if there is only one rope
+            }
+
+            // Use a priority queue (min heap) to keep track of the minimum lengths
+            const minHeap = new MinHeap();
+            
+            // Initialize the min heap with the lengths of the ropes
+            arr.forEach(length => {
+                minHeap.insert(length);
+            });
+
+            let totalCost = 0;
+
+            // Connect the ropes until there is only one left in the heap
+            while (minHeap.size() > 1) {
+                const rope1 = minHeap.extractMin();
+                const rope2 = minHeap.extractMin();
+
+                const cost = rope1 + rope2;
+                totalCost += cost;
+
+                minHeap.insert(cost); // Add the newly created rope to the heap
+            }
+
+            return totalCost;
+        }
+
+        // MinHeap class for implementing a priority queue
+        class MinHeap {
+            constructor() {
+                this.heap = [];
+            }
+
+            size() {
+                return this.heap.length;
+            }
+
+            insert(val) {
+                this.heap.push(val);
+                this.bubbleUp();
+            }
+
+            bubbleUp() {
+                let index = this.heap.length - 1;
+                const element = this.heap[index];
+                while (index > 0) {
+                    const parentIndex = Math.floor((index - 1) / 2);
+                    const parent = this.heap[parentIndex];
+                    if (element >= parent) break;
+                    this.heap[parentIndex] = element;
+                    this.heap[index] = parent;
+                    index = parentIndex;
+                }
+            }
+
+            extractMin() {
+                const min = this.heap[0];
+                const end = this.heap.pop();
+                if (this.heap.length > 0) {
+                    this.heap[0] = end;
+                    this.sinkDown();
+                }
+                return min;
+            }
+
+            sinkDown() {
+                let index = 0;
+                const length = this.heap.length;
+                const element = this.heap[0];
+                while (true) {
+                    const leftChildIndex = 2 * index + 1;
+                    const rightChildIndex = 2 * index + 2;
+                    let leftChild, rightChild;
+                    let swap = null;
+
+                    if (leftChildIndex < length) {
+                        leftChild = this.heap[leftChildIndex];
+                        if (leftChild < element) {
+                            swap = leftChildIndex;
+                        }
+                    }
+
+                    if (rightChildIndex < length) {
+                        rightChild = this.heap[rightChildIndex];
+                        if (
+                            (swap === null && rightChild < element) ||
+                            (swap !== null && rightChild < leftChild)
+                        ) {
+                            swap = rightChildIndex;
+                        }
+                    }
+
+                    if (swap === null) break;
+                    this.heap[index] = this.heap[swap];
+                    this.heap[swap] = element;
+                    index = swap;
+                }
+            }
+        }
+
+        // Function to handle button click and display the result
+        function calculateCost() {
+            const input = document.getElementById('ropes-input').value;
+            const ropes = input.split(',').map(Number);
+
+            const result = mincost(ropes);
+
+            document.getElementById('result').innerHTML = `Minimum Cost: ${result}`;
+        }
+    </script>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
-
+    <h1>Minimum Cost of Connecting Ropes</h1>
+    <p>Enter the lengths of the ropes (comma-separated):</p>
+    <input type="text" id="ropes-input">
+    <button onclick="calculateCost()">Calculate Minimum Cost</button>
+    <p id="result"></p>
 </body>
-
 </html>
